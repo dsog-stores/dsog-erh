@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -642,6 +641,11 @@
               </a>
             </li>
             <li>
+              <a href="#" class="nav-link" data-section="sales-quotations">
+                <span>Sales Quotations</span>
+              </a>
+            </li>
+            <li>
               <a href="#" class="nav-link" data-section="customer-feedback">
                 <span>Customer Feedback</span>
               </a>
@@ -822,7 +826,7 @@
   </div>
 
   <script>
-    // Data for each section with sheet URLs for each tool - ALL YOUR ORIGINAL SHEETS RESTORED
+    // Data for each section with sheet URLs for each tool
     const moduleData = {
       // Product Portfolio - NEW SECTIONS
       "portfolio-overview": {
@@ -948,7 +952,7 @@
         ]
       },
 
-      // Marketing & Sales - NEW SECTIONS
+      // Marketing & Sales - UPDATED WITH SALES QUOTATIONS
       "product-marketing": {
         title: "Product Marketing",
         tools: [
@@ -989,6 +993,36 @@
           }
         ]
       },
+      "sales-quotations": {
+        title: "Sales Quotations",
+        tools: [
+          { 
+            name: "Customer Quote Creation", 
+            link: "customer-quote-creation",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1CUSTOMER_QUOTE_SHEET_ID/edit" 
+          },
+          { 
+            name: "Quote Templates", 
+            link: "quote-templates",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1QUOTE_TEMPLATE_SHEET_ID/edit" 
+          },
+          { 
+            name: "Quote Approval Workflow", 
+            link: "quote-approval",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1QUOTE_APPROVAL_SHEET_ID/edit" 
+          },
+          { 
+            name: "Quote Tracking", 
+            link: "quote-tracking",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1QUOTE_TRACKING_SHEET_ID/edit" 
+          },
+          { 
+            name: "Quote History", 
+            link: "quote-history",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1QUOTE_HISTORY_SHEET_ID/edit" 
+          }
+        ]
+      },
       "customer-feedback": {
         title: "Customer Feedback",
         tools: [
@@ -1010,7 +1044,7 @@
         ]
       },
 
-      // Procurement - ALL YOUR ORIGINAL SHEETS
+      // Procurement - UPDATED WITH SUPPLIER QUOTATIONS
       "supplier-management": {
         title: "Supplier Management",
         tools: [
@@ -1075,9 +1109,19 @@
             sheetUrl: "https://docs.google.com/spreadsheets/d/1QqogZOO6xrtWUUP-n2TiR4xfH7lNEdmpm2I7t0l5rjI/edit" 
           },
           { 
+            name: "Supplier Quotation Analysis", 
+            link: "supplier-quote-analysis",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1SUPPLIER_QUOTE_ANALYSIS_ID/edit" 
+          },
+          { 
             name: "Bid Comparison", 
             link: "bid-comparison",
             sheetUrl: "https://docs.google.com/spreadsheets/d/19sGxaJk1qHuCk3RNrh4QbcY4X5jCW1trvhVrdUbsPc0/edit" 
+          },
+          { 
+            name: "Supplier Quote Tracking", 
+            link: "supplier-quote-tracking",
+            sheetUrl: "https://docs.google.com/spreadsheets/d/1SUPPLIER_QUOTE_TRACKING_ID/edit" 
           },
           { 
             name: "Vendor Selection", 
@@ -1087,7 +1131,7 @@
         ]
       },
       
-      // Inventory Management - ALL YOUR ORIGINAL SHEETS
+      // Inventory Management
       "inventory-control": {
         title: "Inventory Control",
         tools: [
@@ -1164,7 +1208,7 @@
         ]
       },
       
-      // Production - ALL YOUR ORIGINAL SHEETS
+      // Production
       "production-planning": {
         title: "Production Planning",
         tools: [
@@ -1241,7 +1285,7 @@
         ]
       },
       
-      // Logistics - ALL YOUR ORIGINAL SHEETS
+      // Logistics
       "transportation": {
         title: "Transportation",
         tools: [
@@ -1318,7 +1362,7 @@
         ]
       },
       
-      // Analytics - ALL YOUR ORIGINAL SHEETS
+      // Analytics
       "supply-chain-analytics": {
         title: "Supply Chain Analytics",
         tools: [
@@ -1396,7 +1440,7 @@
       }
     };
 
-    // DOM elements and JavaScript functions remain exactly the same as your original
+    // DOM elements and JavaScript functions
     const iframe = document.getElementById("iframe");
     const dropdown = document.getElementById("dropdown");
     const menuToggle = document.getElementById("menuToggle");
