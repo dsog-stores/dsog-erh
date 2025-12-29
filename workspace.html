@@ -56,6 +56,56 @@
       100% { background-position: 0% 0%; }
     }
 
+    /* Access Denied Message */
+    .access-denied {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 25, 47, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .access-denied h2 {
+      color: var(--light-blue);
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    
+    .access-denied p {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    
+    .access-denied-btn {
+      background: var(--light-blue);
+      color: var(--dark-blue);
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .access-denied-btn:hover {
+      background: var(--accent-gold);
+      color: var(--dark-blue);
+      transform: translateY(-2px);
+    }
+
     /* Layout structure */
     .app-container {
       display: flex;
@@ -207,7 +257,7 @@
       overflow: hidden;
     }
 
-    /* Header styles */
+    /* Header styles - UPDATED to include user info */
     header {
       background: var(--medium-blue);
       color: var(--text-primary);
@@ -225,6 +275,7 @@
     .hub-info {
       display: flex;
       flex-direction: column;
+      flex: 1;
     }
 
     .hub-name {
@@ -270,10 +321,48 @@
       background: rgba(100, 255, 218, 0.1);
     }
 
+    /* User Info in Header */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-right: 20px;
+    }
+
+    .user-email {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .logout-btn {
+      background: var(--soft-teal);
+      color: var(--dark-blue);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .logout-btn:hover {
+      background: var(--light-blue);
+      color: var(--dark-blue);
+      transform: translateY(-2px);
+    }
+
     .datetime {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
+      white-space: nowrap;
     }
 
     #time {
@@ -390,6 +479,10 @@
       .sidenav {
         width: 240px;
       }
+      
+      .header-actions {
+        gap: 15px;
+      }
     }
 
     @media (max-width: 992px) {
@@ -426,7 +519,22 @@
       }
       
       .header-actions {
-        gap: 15px;
+        gap: 12px;
+      }
+      
+      .user-email {
+        display: none; /* Hide email on smaller screens */
+      }
+      
+      .logout-btn span {
+        display: none; /* Hide "Logout" text, show only icon */
+      }
+      
+      .logout-btn {
+        padding: 6px;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
       }
     }
 
@@ -489,23 +597,29 @@
       .header-actions {
         width: 100%;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
       }
 
       .dashboard-nav {
         flex-wrap: wrap;
+        order: 3;
+        width: 100%;
+        justify-content: center;
       }
 
+      .user-info {
+        order: 1;
+        margin-right: 0;
+      }
+      
       .datetime {
+        order: 2;
         align-items: flex-start;
       }
       
-      main {
-        padding: 15px;
-      }
-    }
-
-    @media (max-width: 600px) {
       .dropdown {
+        order: 4;
         width: 100%;
       }
 
@@ -520,6 +634,12 @@
         justify-content: center;
       }
       
+      main {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 600px) {
       .header-actions {
         flex-direction: column;
         gap: 10px;
@@ -554,6 +674,11 @@
         padding: 6px 10px;
         font-size: 0.9rem;
       }
+      
+      .logout-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
     }
   </style>
 </head>
@@ -561,7 +686,16 @@
   <div class="background"></div>
   <div class="background-pattern"></div>
 
-  <div class="app-container">
+  <!-- Access Denied Message (Shows when not logged in) -->
+  <div class="access-denied" id="accessDenied">
+    <h2>🔒 Access Restricted</h2>
+    <p>You need to be logged in to access the Enterprise Resource Hub. Please sign in through the main dashboard first.</p>
+    <a href="index.html" class="access-denied-btn">Go to Dashboard</a>
+  </div>
+
+  <!-- Workspace Content (Shows when logged in) -->
+  <div class="app-container" id="workspaceContainer" style="display: none;">
+    
     <!-- Side Navigation -->
     <nav class="sidenav">
       <div class="nav-logo-placeholder">
@@ -789,9 +923,13 @@
         </div>
 
         <div class="header-actions">
-          <div class="dashboard-nav">
-            <a href="index.html" id="homeButton">Home</a>
-            <a href="#" class="active" id="workspaceButton">Workspace</a>
+          <!-- User Info in Header -->
+          <div class="user-info">
+            <div class="user-email" id="userEmail">admin@erh.com</div>
+            <button class="logout-btn" id="logoutBtn">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </button>
           </div>
 
           <div class="datetime">
@@ -812,6 +950,11 @@
               <a href="#" data-link="prototype-tracking">Prototype Tracking</a>
             </div>
           </div>
+          
+          <div class="dashboard-nav">
+            <a href="index.html" id="homeButton">Home</a>
+            <a href="#" class="active" id="workspaceButton">Workspace</a>
+          </div>
         </div>
       </header>
 
@@ -825,7 +968,76 @@
     </div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
+    // Your Firebase configuration (same as in index.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOb4BqfiN3vt1Y13UTEpA_boCqNRH6rrQ",
+      authDomain: "dsog-stores-dashboard.firebaseapp.com",
+      databaseURL: "https://dsog-stores-dashboard-default-rtdb.firebaseio.com",
+      projectId: "dsog-stores-dashboard",
+      storageBucket: "dsog-stores-dashboard.firebasestorage.app",
+      messagingSenderId: "1085972125142",
+      appId: "1:1085972125142:web:9abea9ee0dd792a052c077"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    
+    // Authentication state observer
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in - show workspace
+        handleUserSignedIn(user);
+      } else {
+        // User is signed out - show access denied
+        handleUserSignedOut();
+      }
+    });
+
+    function handleUserSignedIn(user) {
+      console.log("User signed in:", user.email);
+      
+      // Hide access denied message
+      document.getElementById('accessDenied').style.display = 'none';
+      
+      // Show workspace content
+      document.getElementById('workspaceContainer').style.display = 'flex';
+      
+      // Update user email display
+      document.getElementById('userEmail').textContent = user.email;
+      
+      // Initialize the workspace functionality
+      initWorkspace();
+    }
+
+    function handleUserSignedOut() {
+      console.log("User signed out");
+      
+      // Show access denied message
+      document.getElementById('accessDenied').style.display = 'flex';
+      
+      // Hide workspace content
+      document.getElementById('workspaceContainer').style.display = 'none';
+    }
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      auth.signOut()
+        .then(() => {
+          // Redirect to home page after logout
+          window.location.href = 'index.html';
+        })
+        .catch((error) => {
+          console.error("Logout error:", error);
+        });
+    });
+
     // Data for each section with sheet URLs for each tool
     const moduleData = {
       // Product Portfolio - NEW SECTIONS
@@ -1440,195 +1652,198 @@
       }
     };
 
-    // DOM elements and JavaScript functions
-    const iframe = document.getElementById("iframe");
-    const dropdown = document.getElementById("dropdown");
-    const menuToggle = document.getElementById("menuToggle");
-    const menuContent = document.getElementById("menuContent");
-    const timeElement = document.getElementById("time");
-    const dateElement = document.getElementById("date");
-    const navSections = document.querySelectorAll(".nav-section");
-    const navLinks = document.querySelectorAll(".nav-link");
+    // Initialize workspace functionality
+    function initWorkspace() {
+      // DOM elements
+      const iframe = document.getElementById("iframe");
+      const dropdown = document.getElementById("dropdown");
+      const menuToggle = document.getElementById("menuToggle");
+      const menuContent = document.getElementById("menuContent");
+      const timeElement = document.getElementById("time");
+      const dateElement = document.getElementById("date");
+      const navSections = document.querySelectorAll(".nav-section");
+      const navLinks = document.querySelectorAll(".nav-link");
 
-    // Initialize the application
-    function initApp() {
-      setupEventListeners();
-      loadInitialSection();
-      updateClock();
-      setInterval(updateClock, 60000);
-    }
+      // Initialize the application
+      function initApp() {
+        setupEventListeners();
+        loadInitialSection();
+        updateClock();
+        setInterval(updateClock, 60000); // Update time every minute
+      }
 
-    // Set up all event listeners
-    function setupEventListeners() {
-      document.querySelectorAll(".nav-section-title").forEach(title => {
-        title.addEventListener("click", function(e) {
-          e.stopPropagation();
-          const section = this.parentElement;
-          navSections.forEach(s => {
-            if (s !== section) s.classList.remove("active");
+      // Set up all event listeners
+      function setupEventListeners() {
+        document.querySelectorAll(".nav-section-title").forEach(title => {
+          title.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const section = this.parentElement;
+            navSections.forEach(s => {
+              if (s !== section) s.classList.remove("active");
+            });
+            section.classList.toggle("active");
           });
-          section.classList.toggle("active");
         });
-      });
 
-      navLinks.forEach(link => {
-        link.addEventListener("click", function(e) {
-          e.preventDefault();
-          handleNavLinkClick(this);
+        navLinks.forEach(link => {
+          link.addEventListener("click", function(e) {
+            e.preventDefault();
+            handleNavLinkClick(this);
+          });
         });
-      });
 
-      menuContent.addEventListener("click", function(e) {
-        if (e.target.tagName === 'A') {
-          e.preventDefault();
-          handleToolClick(e.target);
+        menuContent.addEventListener("click", function(e) {
+          if (e.target.tagName === 'A') {
+            e.preventDefault();
+            handleToolClick(e.target);
+          }
+        });
+
+        menuToggle.addEventListener("click", function(e) {
+          e.stopPropagation();
+          dropdown.classList.toggle("open");
+        });
+
+        document.addEventListener("click", function() {
+          dropdown.classList.remove("open");
+        });
+      }
+
+      function handleNavLinkClick(link) {
+        navLinks.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+        
+        const section = link.dataset.section;
+        const data = moduleData[section];
+        
+        if (!data) {
+          console.error("No data found for section:", section);
+          return;
         }
-      });
+        
+        updateToolsMenu(data.tools);
+        
+        if (data.tools.length > 0) {
+          loadToolContent(data.tools[0].sheetUrl);
+        }
+      }
 
-      menuToggle.addEventListener("click", function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle("open");
-      });
+      function updateToolsMenu(tools) {
+        menuContent.innerHTML = '';
+        tools.forEach(tool => {
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = tool.name;
+          link.dataset.link = tool.link;
+          link.dataset.sheetUrl = tool.sheetUrl;
+          menuContent.appendChild(link);
+        });
+      }
 
-      document.addEventListener("click", function() {
+      function handleToolClick(toolElement) {
         dropdown.classList.remove("open");
-      });
-    }
-
-    function handleNavLinkClick(link) {
-      navLinks.forEach(l => l.classList.remove("active"));
-      link.classList.add("active");
-      
-      const section = link.dataset.section;
-      const data = moduleData[section];
-      
-      if (!data) {
-        console.error("No data found for section:", section);
-        return;
+        const sheetUrl = toolElement.dataset.sheetUrl;
+        loadToolContent(sheetUrl);
       }
-      
-      updateToolsMenu(data.tools);
-      
-      if (data.tools.length > 0) {
-        loadToolContent(data.tools[0].sheetUrl);
-      }
-    }
 
-    function updateToolsMenu(tools) {
-      menuContent.innerHTML = '';
-      tools.forEach(tool => {
-        const link = document.createElement('a');
-        link.href = '#';
-        link.textContent = tool.name;
-        link.dataset.link = tool.link;
-        link.dataset.sheetUrl = tool.sheetUrl;
-        menuContent.appendChild(link);
-      });
-    }
-
-    function handleToolClick(toolElement) {
-      dropdown.classList.remove("open");
-      const sheetUrl = toolElement.dataset.sheetUrl;
-      loadToolContent(sheetUrl);
-    }
-
-    function loadToolContent(sheetUrl) {
-      if (sheetUrl && sheetUrl.includes('docs.google.com')) {
-        const sheetId = extractSheetId(sheetUrl);
-        if (sheetId) {
-          iframe.src = `https://docs.google.com/spreadsheets/d/${sheetId}/edit?usp=sharing`;
+      function loadToolContent(sheetUrl) {
+        if (sheetUrl && sheetUrl.includes('docs.google.com')) {
+          const sheetId = extractSheetId(sheetUrl);
+          if (sheetId) {
+            iframe.src = `https://docs.google.com/spreadsheets/d/${sheetId}/edit?usp=sharing`;
+          } else {
+            showPlaceholderContent("Invalid Google Sheet URL format");
+          }
         } else {
-          showPlaceholderContent("Invalid Google Sheet URL format");
+          showPlaceholderContent("No Google Sheet configured for this tool");
         }
-      } else {
-        showPlaceholderContent("No Google Sheet configured for this tool");
       }
-    }
 
-    function showPlaceholderContent(message) {
-      iframe.srcdoc = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 100%;
-              font-family: Arial, sans-serif;
-              color: #666;
-              background: #f9f9f9;
-            }
-            .content {
-              text-align: center;
-              padding: 20px;
-              max-width: 500px;
-            }
-            i {
-              font-size: 3rem;
-              color: #ddd;
-              margin-bottom: 20px;
-            }
-            h2 {
-              color: #444;
-              margin: 0 0 15px 0;
-            }
-            p {
-              margin: 5px 0;
-              line-height: 1.5;
-            }
-          </style>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        </head>
-        <body>
-          <div class="content">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h2>Content Not Available</h2>
-            <p>${message}</p>
-            ${message.includes('configured') ? '<p>Please configure a valid Google Sheet URL in the moduleData object.</p>' : ''}
-          </div>
-        </body>
-        </html>
-      `;
-    }
-
-    function updateClock() {
-      const now = new Date();
-      let hours = now.getHours();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      
-      timeElement.textContent = `${hours}:${minutes} ${ampm}`;
-      
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      dateElement.textContent = now.toLocaleDateString('en-US', options);
-    }
-
-    function extractSheetId(url) {
-      try {
-        const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-        return match ? match[1] : null;
-      } catch (e) {
-        console.error("Error extracting sheet ID:", e);
-        return null;
+      function showPlaceholderContent(message) {
+        iframe.srcdoc = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                font-family: Arial, sans-serif;
+                color: #666;
+                background: #f9f9f9;
+              }
+              .content {
+                text-align: center;
+                padding: 20px;
+                max-width: 500px;
+              }
+              i {
+                font-size: 3rem;
+                color: #ddd;
+                margin-bottom: 20px;
+              }
+              h2 {
+                color: #444;
+                margin: 0 0 15px 0;
+              }
+              p {
+                margin: 5px 0;
+                line-height: 1.5;
+              }
+            </style>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+          </head>
+          <body>
+            <div class="content">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h2>Content Not Available</h2>
+              <p>${message}</p>
+              ${message.includes('configured') ? '<p>Please configure a valid Google Sheet URL in the moduleData object.</p>' : ''}
+            </div>
+          </body>
+          </html>
+        `;
       }
-    }
 
-    function loadInitialSection() {
-      const activeLink = document.querySelector('.nav-link.active');
-      if (activeLink) {
-        handleNavLinkClick(activeLink);
-      } else if (navLinks.length > 0) {
-        navLinks[0].classList.add("active");
-        handleNavLinkClick(navLinks[0]);
+      function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        
+        timeElement.textContent = `${hours}:${minutes} ${ampm}`;
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateElement.textContent = now.toLocaleDateString('en-US', options);
       }
-    }
 
-    document.addEventListener('DOMContentLoaded', initApp);
+      function extractSheetId(url) {
+        try {
+          const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+          return match ? match[1] : null;
+        } catch (e) {
+          console.error("Error extracting sheet ID:", e);
+          return null;
+        }
+      }
+
+      function loadInitialSection() {
+        const activeLink = document.querySelector('.nav-link.active');
+        if (activeLink) {
+          handleNavLinkClick(activeLink);
+        } else if (navLinks.length > 0) {
+          navLinks[0].classList.add("active");
+          handleNavLinkClick(navLinks[0]);
+        }
+      }
+
+      // Initialize the application
+      initApp();
+    }
   </script>
-
 </body>
 </html>
