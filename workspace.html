@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* Your existing CSS remains exactly the same */
     :root {
       --dark-blue: #0a192f;
       --medium-blue: #172a45;
@@ -56,6 +55,58 @@
       100% { background-position: 0% 0%; }
     }
 
+    /* Loader */
+    .auth-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--dark-blue);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10001;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .auth-loader-text {
+      color: var(--light-blue);
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* Loader animation */
+    .loader {
+      width: 45px;
+      aspect-ratio: 1;
+      --c: no-repeat linear-gradient(var(--light-blue) 0 0);
+      background: var(--c), var(--c), var(--c), var(--c), var(--c), var(--c);
+      animation: 
+        l14-1 .5s infinite alternate,
+        l14-2 2s infinite;
+    }
+    
+    @keyframes l14-1 {
+      0%,10% { background-size: 20% 100%; }
+      100% { background-size: 20% 20%; }
+    }
+    
+    @keyframes l14-2 {
+      0%,49.9% { background-position: 0 0, 0 100%, 50% 50%, 50% 50%, 100% 0, 100% 100%; }
+      50%,100% { background-position: 0 50%, 0 50%, 50% 0, 50% 100%, 100% 50%, 100% 50%; }
+    }
+
     /* Access Denied Message */
     .access-denied {
       position: fixed;
@@ -64,7 +115,7 @@
       width: 100%;
       height: 100%;
       background: rgba(10, 25, 47, 0.95);
-      display: flex;
+      display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -108,7 +159,7 @@
 
     /* Layout structure */
     .app-container {
-      display: flex;
+      display: none;
       height: 100vh;
       min-height: 0;
       width: 100%;
@@ -257,7 +308,7 @@
       overflow: hidden;
     }
 
-    /* Header styles - UPDATED to include user info */
+    /* Header styles */
     header {
       background: var(--medium-blue);
       color: var(--text-primary);
@@ -523,11 +574,11 @@
       }
       
       .user-email {
-        display: none; /* Hide email on smaller screens */
+        display: none;
       }
       
       .logout-btn span {
-        display: none; /* Hide "Logout" text, show only icon */
+        display: none;
       }
       
       .logout-btn {
@@ -686,6 +737,12 @@
   <div class="background"></div>
   <div class="background-pattern"></div>
 
+  <!-- Authentication Loader (Shows first) -->
+  <div class="auth-loader" id="authLoader">
+    <div class="loader"></div>
+    <div class="auth-loader-text">Verifying your access...</div>
+  </div>
+
   <!-- Access Denied Message (Shows when not logged in) -->
   <div class="access-denied" id="accessDenied">
     <h2>🔒 Access Restricted</h2>
@@ -694,7 +751,7 @@
   </div>
 
   <!-- Workspace Content (Shows when logged in) -->
-  <div class="app-container" id="workspaceContainer" style="display: none;">
+  <div class="app-container" id="workspaceContainer">
     
     <!-- Side Navigation -->
     <nav class="sidenav">
@@ -974,7 +1031,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <script>
-    // Your Firebase configuration (same as in index.html)
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCOb4BqfiN3vt1Y13UTEpA_boCqNRH6rrQ",
       authDomain: "dsog-stores-dashboard.firebaseapp.com",
@@ -989,25 +1046,53 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     
+    // DOM elements
+    const authLoader = document.getElementById('authLoader');
+    const accessDenied = document.getElementById('accessDenied');
+    const workspaceContainer = document.getElementById('workspaceContainer');
+    
+    // Show loader initially
+    authLoader.style.display = 'flex';
+    accessDenied.style.display = 'none';
+    workspaceContainer.style.display = 'none';
+    
     // Authentication state observer
+    let authCheckTimeout;
+    
     auth.onAuthStateChanged((user) => {
+      // Clear any existing timeout
+      clearTimeout(authCheckTimeout);
+      
       if (user) {
-        // User is signed in - show workspace
-        handleUserSignedIn(user);
+        // User is signed in - show workspace after a short delay
+        setTimeout(() => {
+          handleUserSignedIn(user);
+        }, 800); // Short delay for better UX
       } else {
-        // User is signed out - show access denied
-        handleUserSignedOut();
+        // User is signed out - show access denied after a short delay
+        setTimeout(() => {
+          handleUserSignedOut();
+        }, 800);
       }
     });
+    
+    // Set a timeout in case Firebase auth takes too long
+    authCheckTimeout = setTimeout(() => {
+      // Force check current user
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        handleUserSignedOut();
+      }
+    }, 3000); // 3 second timeout
 
     function handleUserSignedIn(user) {
       console.log("User signed in:", user.email);
       
-      // Hide access denied message
-      document.getElementById('accessDenied').style.display = 'none';
+      // Hide loader
+      authLoader.style.display = 'none';
       
       // Show workspace content
-      document.getElementById('workspaceContainer').style.display = 'flex';
+      workspaceContainer.style.display = 'flex';
       
       // Update user email display
       document.getElementById('userEmail').textContent = user.email;
@@ -1019,11 +1104,14 @@
     function handleUserSignedOut() {
       console.log("User signed out");
       
+      // Hide loader
+      authLoader.style.display = 'none';
+      
       // Show access denied message
-      document.getElementById('accessDenied').style.display = 'flex';
+      accessDenied.style.display = 'flex';
       
       // Hide workspace content
-      document.getElementById('workspaceContainer').style.display = 'none';
+      workspaceContainer.style.display = 'none';
     }
 
     // Logout functionality
